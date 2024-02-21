@@ -1,0 +1,243 @@
+#include <iostream>
+#include <fstream>
+#include <assert.h>
+
+using namespace std;
+
+typedef int Item;
+
+// Kieu Node bieu dien 1 nut trong DSLK don
+struct snode {
+    Item data;
+    struct snode *next;
+};
+typedef struct snode Node;
+
+// Kieu SLinkedList bien dien 1 DSLK don
+// co nut dau (head) va nut cuoi (tail)
+struct slinkedlist {
+    Node *head;
+    Node *tail;
+    long size;
+};
+typedef struct slinkedlist SLinkedList;
+
+// Ham tao mot nut moi va tra ve dia chi cua nut vua tao
+Node * createNode(const Item &value) {
+    Node * tmp = new Node;
+    tmp->data = value;
+    tmp->next = NULL;
+    return tmp;
+}
+
+// 1. Ham kiem tra danh sach co rong hay khong
+int empty(SLinkedList * L);
+
+// 2. Ham xac dinh do dai cua danh sach
+int length(SLinkedList * L);
+
+// 3. Ham tra ve nut o vi tri index
+Node * element(SLinkedList * L, int index);
+
+// 4. Ham in danh sach
+void traverse(SLinkedList * L);
+
+// 5. Ham them mot nut moi vao dau danh sach
+void addFirst(SLinkedList * L, const Item & value);
+
+// 6. Ham them mot nut moi vao cuoi danh sach
+void addLast(SLinkedList * L, const Item & value);
+
+// 7. Ham xoa nut dau danh sach
+void removeFirst(SLinkedList * L);
+
+// 8. Ham xoa nut cuoi danh sach
+void removeLast(SLinkedList * L);
+
+// 9. Ham tim phan tu trong danh sach co gia tri value (tra ve con tro toi nut do)
+Node * search(SLinkedList * L, const Item & value);
+
+// 10. Ham chen vao danh sach tai vi tri index phan tu co gia tri value
+void insert(SLinkedList * L, int index, const Item & value);
+
+// 11. Ham chen vao danh sach TRUOC nut p phan tu co gia tri value
+void insertAfter(SLinkedList * L, Node * p, const Item & value);
+
+// 12. Ham chen vao danh sach SAU nut p phan tu co gia tri value
+void insertBefore(SLinkedList * L, Node * p, const Item & value);
+
+// 13. Ham xoa khoi danh sach nut p
+void remove(SLinkedList * L, Node *& p);
+
+// 14. Ham chen vao cuoi danh sach voi du lieu tu file
+void readFile(SLinkedList * L, char * filename);
+
+// Chuong trinh chinh
+int main(){
+    cout << "Chuong trinh demo DSLK don." << endl;
+    cout << "Tac gia: Pham Van Manh\n--------------------" << endl;
+
+    // Khoi tao DSLK1 rong
+    SLinkedList *sll1 = new SLinkedList;
+    sll1->head = NULL;
+    sll1->tail = NULL;
+    sll1->size = 0;
+    cout << "Check danh sach rong: " << empty(sll1) << endl;
+    for (int i = 0; i < 10; i++) {
+    	Item a = i;
+    	addLast(sll1,a);
+	}
+	Item b = 100;
+	insertAfter(sll1,element(sll1,3),b);
+//    insert(sll1,2,b);
+    //cout << "Xong!" << endl;
+    
+    //addFirst(sll1,a); 
+    traverse(sll1);
+    
+    Node *p = sll1->head->next->next;
+    insertBefore(sll1,p,b);
+    remove(sll1, p);
+    traverse(sll1);
+     cout << "Check danh sach rong: " << empty(sll1) << endl;
+     cout << "chieu dai mang: " << sll1->size <<endl;
+    free(sll1);
+    return 0;
+}
+
+// 1. Ham kiem tra danh sach co rong hay khong
+int empty(SLinkedList *L) {
+    if (L->size == 0) return 1;
+    else return 0;
+}
+
+// 2. Ham xac dinh do dai cua danh sach
+int length(SLinkedList *L) {
+    return L->size;
+}
+
+// 3. Ham tra ve nut o vi tri index
+Node * element(SLinkedList *L, int index) {
+    assert(index >= 0 && index < L->size);
+    Node *tmp = L->head;
+    for (int i = 1; i <= index; i++) tmp = tmp->next;
+    return tmp;
+}
+
+// 4. Ham in danh sach
+void traverse(SLinkedList * L) {
+    Node *tmp = L->head;
+    while(tmp != NULL) {
+    	cout << tmp->data << " ";
+    	tmp = tmp->next;
+	}
+	cout << endl;
+	//free(tmp);
+}
+
+// 5. Ham them mot nut moi vao dau danh sach
+void addFirst(SLinkedList *L, const Item &value) {
+    Node *newNode = createNode(value);
+    if (L->size == 0) {
+    	L->head = newNode;
+    	L->tail = newNode;
+	}
+    newNode->next = L->head;
+    L->head = newNode;
+    L->size ++;
+    
+}
+
+// 6. Ham them mot nut moi vao cuoi danh sach
+void addLast(SLinkedList *L, const Item &value) {
+    Node *newNode = createNode(value);
+    if (L->size == 0) {
+    	L->head = newNode;
+    	L->tail = newNode;
+	}
+    L->tail->next = newNode;
+    L->tail = newNode;
+    L->size ++;
+}
+
+// 7. Ham xoa nut dau danh sach
+void removeFirst(SLinkedList *L) {
+    Node *tmp = L->head;
+    L->head = L->head->next;
+    free(tmp);
+}
+
+// 8. Ham xoa nut cuoi danh sach
+void removeLast(SLinkedList *L) {
+    Node *tmp = L->head;
+    while(tmp->next != NULL) {
+    	tmp = tmp->next;
+	}
+	L->tail = tmp;
+	free(tmp->next);
+}
+
+// 9. Ham tim phan tu trong danh sach co gia tri value (tra ve con tro toi nut do)
+Node *search(SLinkedList *L, const Item &value) {
+    Node *tmp = L->head;
+    while(tmp->next != NULL) {
+    	if (tmp->data == value) {
+    		return tmp; 
+		} else tmp = tmp->next;
+	}
+	
+}
+
+// 10. Ham chen vao danh sach tai vi tri index phan tu co gia tri value
+void insert(SLinkedList *L, int index, const Item & value) {
+    Node *newNode = createNode(value);
+    Node *p = L->head;
+    for (int i = 1; i < index; i++) p = p->next;
+    newNode->next = p->next->next;
+    p->next = newNode;
+    L->size ++;
+}
+
+// 11. Ham chen vao danh sach TRUOC nut p phan tu co gia tri value
+void insertAfter(SLinkedList *L, Node *p, const Item & value) {
+    Node *newNode = createNode(value);
+    Node *q = L->head;
+    while(q->next != p) q = q->next;
+    newNode->next = p;
+    q->next = newNode;
+    L->size++;
+    
+}
+
+// 12. Ham chen vao danh sach SAU nut p phan tu co gia tri value
+void insertBefore(SLinkedList *L, Node *p, const Item & value) {
+    Node *newNode = createNode(value);
+    newNode->next = p->next;
+    p->next = newNode;
+    L->size++;
+}
+
+// 13. Ham xoa khoi danh sach nut p
+void remove(SLinkedList *L, Node *&p) {
+    Node *tmp = L->head;
+    while(tmp->next != p) tmp = tmp->next;
+    tmp->next = p->next;
+    L->size --;
+ }
+
+// 14. Ham chen vao cuoi danh sach voi du lieu tu file
+void readFile(SLinkedList * L, char * filename) {
+    ifstream fin(filename);
+    if(!fin.good()){
+        cout << "Loi doc file " << filename << endl;
+        return;
+    }
+    int value;
+    while(fin >> value)
+    {
+        /*
+            .... them code vao day
+        */
+    }
+    fin.close();
+}
